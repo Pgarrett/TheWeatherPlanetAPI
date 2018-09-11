@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import theweatherplanetapi.handler.GenerateHandler;
 import theweatherplanetapi.handler.GetForecastHandler;
 import theweatherplanetapi.handler.VersionHandler;
 import theweatherplanetapi.utils.Constants;
@@ -59,7 +60,8 @@ public class TheWeatherPlanetAPI {
 
     private static void start() {
 	_httpHost.registerHandler(new VersionHandler("/api/version"));
-	_httpHost.registerHandler(new GetForecastHandler("/api/forecast", "/api/forecast", _dataFile));
+	_httpHost.registerHandler(new GetForecastHandler("/api/forecast", "/api/forecast", _dataDirectory, _dataFile));
+	_httpHost.registerHandler(new GenerateHandler("/api/generate", _yearsToForecast, _dataDirectory, _dataFile));
 	_httpHost.start();
     }
 

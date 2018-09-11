@@ -27,4 +27,7 @@ public class Constants {
     public static final String PRONOSTICO = "pronostico";
     public static final String CONDICION = "condicion";
     
+    public static final String START_FILE = "data.start";
+    public static final String ERROR_FILE = "data.error";
+    
 }

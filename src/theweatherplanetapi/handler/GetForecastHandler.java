@@ -13,10 +13,12 @@ import whiz.net.servers.HttpRequest;
 
 public class GetForecastHandler extends AbstractHttpHandler {
 
+    private final File _dataDirectory;
     private final File _dataFile;
 
-    public GetForecastHandler(final String route, final String template, final File dataFile) {
+    public GetForecastHandler(final String route, final String template, final File dataDirectory, final File dataFile) {
 	super(GetForecastHandler.class, route, template);
+	_dataDirectory = dataDirectory;
 	_dataFile = dataFile;
     }
 
@@ -25,6 +27,11 @@ public class GetForecastHandler extends AbstractHttpHandler {
 	if (queryStringParams.containsKey(Constants.DIA)) {
 	    final int day = Integer.valueOf(queryStringParams.get(Constants.DIA));
 	    if (day >= 0) {
+		if (new File(_dataDirectory, Constants.START_FILE).exists()) {
+		    return new JsonObjectBuilder().add("status", -5).add("result", "El sistema se encuentra generando pronósticos, reintente luego.").getAsJsonObject();
+		} else if (new File(_dataDirectory, Constants.ERROR_FILE).exists()) {
+		    return new JsonObjectBuilder().add("status", -4).add("result", "Error al generar los pronósticos.").getAsJsonObject();
+		}
 		if (_dataFile.exists()) {
 		    final JsonObject o = Json.readFileAsJsonObject(_dataFile);
 		    if (assigned(o) && o.has(Constants.PRONOSTICO)) {
@@ -32,9 +39,9 @@ public class GetForecastHandler extends AbstractHttpHandler {
 			if (forecast.size() >= day) {
 			    return new JsonObjectBuilder().add("status", 0).add("result", Json.obtainString(forecast.get(day).getAsJsonObject(), Constants.CONDICION)).getAsJsonObject();
 			}
-			return new JsonObjectBuilder().add("status", -5).add("result", "El día solicitado no se encuentra en el pronóstico.").getAsJsonObject();
+			return new JsonObjectBuilder().add("status", -7).add("result", "El día solicitado no se encuentra en el pronóstico.").getAsJsonObject();
 		    }
-		    return new JsonObjectBuilder().add("status", -4).add("result", "Error al leer el archivo de datos.").getAsJsonObject();
+		    return new JsonObjectBuilder().add("status", -6).add("result", "Error al leer el archivo de datos.").getAsJsonObject();
 		}
 		return new JsonObjectBuilder().add("status", -3).add("result", "No hay pronósticos generados al momento.").getAsJsonObject();
 	    }
